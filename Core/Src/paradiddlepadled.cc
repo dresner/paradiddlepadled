@@ -1,4 +1,5 @@
 #include <halal/serial_console.h>
+#include "tester.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,12 +11,14 @@ void paradiddlepadled_main(void);
 
 void paradiddlepadled_main(void) {
 	Serial_Console c;
+	Tester t;
 
 	c << "Hello!" << c.endl;
+	t.greet();
 
 	while (true) {
 		std::string in;
 		c >> in;
-		c << in << c.endl;
+		t.run_test(in);
 	}
 }
