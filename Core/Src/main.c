@@ -52,7 +52,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void paradiddlepadled_main(void);
 /* USER CODE END 0 */
 
 /**
@@ -83,7 +83,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
-
+  paradiddlepadled_main();
   /* USER CODE END 2 */
 
   /* Infinite loop */
