@@ -12,6 +12,10 @@ public:
 
 private:
 	static void help(void);
+	static void right_on(void);
+	static void right_off(void);
+	static void left_on(void);
+	static void left_off(void);
 
 	struct Test {
 		const char *command;
