@@ -9,6 +9,7 @@ public:
 	static void greet(void);
 
 	static bool run_test(const std::string &command);
+	static void main_loop(void);
 
 private:
 	static void help(void);

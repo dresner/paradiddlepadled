@@ -13,6 +13,18 @@ const Tester::Test Tester::_test_table[] = {
 		{"loff", "Turn off LED indicator of Left hit", Tester::left_off},
 };
 
+void Tester::main_loop(void) {
+	greet();
+
+	while (true) {
+		std::string command;
+		_console >> command;
+		if (!run_test(command)) {
+			_console << "Unrecognized command: " << command << _console.endl;
+		}
+	}
+}
+
 void Tester::greet(void) {
 	_console << "Hi! Welcome to Paradiddlepadled Tester v0.1" << _console.endl;
 }
@@ -31,7 +43,6 @@ bool Tester::run_test(const std::string &command) {
 			return true;
 		}
 	}
-	_console << "Unrecognized command: " << command << _console.endl;
 	return false;
 }
 
