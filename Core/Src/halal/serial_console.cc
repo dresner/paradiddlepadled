@@ -33,4 +33,5 @@ Serial_Console& Serial_Console::operator>>(std::string &s) {
 			return *this;
 		}
 	}
+	return *this;
 }

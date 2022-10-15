@@ -17,6 +17,10 @@ private:
 	static void right_off(void);
 	static void left_on(void);
 	static void left_off(void);
+	static void metronome_on(void);
+	static void metronome_off(void);
+	static void metronome_up(void);
+	static void metronome_down(void);
 
 	struct Test {
 		const char *command;
