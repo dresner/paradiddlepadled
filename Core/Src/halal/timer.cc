@@ -15,24 +15,24 @@ void Timer::stop(void) {
 	_running = false;
 }
 
-void Timer::bpm_up(void) {
+void Timer::bpm_up(unsigned int how_much) {
 	bool r = _running;
 	if (r) {
 		stop();
 	}
-	TIM->Init.Period -= BPM_STEP;
+	TIM->Init.Period -= how_much * BPM_STEP;
 	HAL_TIM_Base_Init(TIM);
 	if (r) {
 		start();
 	}
 }
 
-void Timer::bpm_down(void) {
+void Timer::bpm_down(unsigned int how_much) {
 	bool r = _running;
 	if (r) {
 		stop();
 	}
-	TIM->Init.Period += BPM_STEP;
+	TIM->Init.Period += how_much * BPM_STEP;
 	HAL_TIM_Base_Init(TIM);
 	if (r) {
 		start();

@@ -15,8 +15,10 @@ const Tester::Test Tester::_test_table[] = {
 		{"loff", "Turn off LED indicator of Left hit", Tester::left_off},
 		{"mon",  "Start metronome", Tester::metronome_on},
 		{"moff", "Stop metronome", Tester::metronome_off},
-		{"m+",  "Increase metronome BPM", Tester::metronome_up},
-		{"m-", "Decrease metronome BPM", Tester::metronome_down},
+		{"m+",  "Increase metronome BPM by 10", Tester::metronome_up},
+		{"m-", "Decrease metronome BPM by 10", Tester::metronome_down},
+		{"m+1",  "Increase metronome BPM by 1", Tester::metronome_up_one},
+		{"m-1", "Decrease metronome BPM by 1", Tester::metronome_down_one},
 };
 
 
@@ -69,5 +71,7 @@ void Tester::left_off(void) { LED{LED::Left{}}.off(); }
 
 void Tester::metronome_on(void) { Timer::start(); }
 void Tester::metronome_off(void) { Timer::stop(); }
-void Tester::metronome_up(void) { Timer::bpm_up(); }
-void Tester::metronome_down(void) { Timer::bpm_down(); }
+void Tester::metronome_up(void) { Timer::bpm_up(10); }
+void Tester::metronome_down(void) { Timer::bpm_down(10); }
+void Tester::metronome_up_one(void) { Timer::bpm_up(1); }
+void Tester::metronome_down_one(void) { Timer::bpm_down(1); }

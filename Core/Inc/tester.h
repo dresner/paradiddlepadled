@@ -21,6 +21,8 @@ private:
 	static void metronome_off(void);
 	static void metronome_up(void);
 	static void metronome_down(void);
+	static void metronome_up_one(void);
+	static void metronome_down_one(void);
 
 	struct Test {
 		const char *command;

@@ -6,12 +6,12 @@ public:
 	static void start(void);
 	static void stop(void);
 
-	static void bpm_up(void);
-	static void bpm_down(void);
+	static void bpm_up(unsigned int how_much);
+	static void bpm_down(unsigned int how_much);
 
 private:
 	static bool _running;
-	static const unsigned int BPM_STEP = 1000;
+	static const unsigned int BPM_STEP = 271186;
 };
 
 #endif /* INC_HALAL_TIMER_H_ */
