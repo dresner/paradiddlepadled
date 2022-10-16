@@ -21,18 +21,8 @@ const Tester::Test Tester::_test_table[] = {
 		{"m-1", "Decrease metronome BPM by 1", Tester::metronome_down_one},
 };
 
-
-LED r{LED::Right{}};
-LED l{LED::Left{}};
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	l.toggle();
-	r.toggle();
-}
-
 void Tester::main_loop(void) {
 	greet();
-	l.on();
-	r.off();
 
 	while (true) {
 		std::string command;

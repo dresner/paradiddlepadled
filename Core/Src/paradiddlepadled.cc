@@ -9,5 +9,6 @@ void paradiddlepadled_main(void);
 #endif
 
 void paradiddlepadled_main(void) {
+	Tester::run_test("mon");
 	Tester::main_loop();
 }
