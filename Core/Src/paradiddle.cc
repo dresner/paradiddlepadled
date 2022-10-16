@@ -1,51 +1,46 @@
 #include "tim.h"
 #include "halal/led.h"
-
-class Paradiddle {
-public:
-	typedef uint8_t Step;
-
-	Paradiddle(const Step states[]) : _head{states} {
-		_current = _head;
-	}
-
-	static const Step NONE = 0;
-	static const Step L = 1 << 0;
-	static const Step R = 1 << 1;
-	static const Step LR = L | R;
-	static const Step END = -1;
-
-	Step value() const { return *_current; }
-	bool left() const { return left(*_current); }
-	bool right() const { return right(*_current); }
-	void set_next() {
-		++_current;
-		if (*_current == END) {
-			_current = _head;
-		}
-	}
-
-	static bool left(Step value) { return value & L; }
-	static bool right(Step value) { return value & R; }
-
-private:
-	const Step * _current;
-	const Step * _head;
-};
+#include "paradiddle.h"
 
 const auto L = Paradiddle::L;
 const auto R = Paradiddle::R;
+const auto LR = Paradiddle::LR;
 const auto END = Paradiddle::END;
 
+Paradiddle * Paradiddle::_current_pattern = NULL;
+Paradiddle * Paradiddle::_last_pattern = NULL;
+
+Paradiddle::Paradiddle(const Step states[]): _head{states} {
+	_current_step = _head;
+
+	if (_current_pattern == NULL) {
+		_next_pattern = this;
+		_previous_pattern = this;
+		_current_pattern = this;
+		_last_pattern = this;
+	} else {
+		_next_pattern = _last_pattern->_next_pattern;
+		_previous_pattern = _last_pattern;
+		_previous_pattern->_next_pattern = this;
+		_next_pattern->_previous_pattern = this;
+		_last_pattern = this;
+	}
+}
+
 const Paradiddle::Step s1[] {R, L, R, R, L, R, L, L, END};
-Paradiddle paradiddle {s1};
+const Paradiddle::Step s2[] {R, L, R, R, L, L, END};
+const Paradiddle::Step s3[] {L, R, L, L, R, R, END};
+Paradiddle p1 {s1};
+Paradiddle p2 {s2};
+Paradiddle p3 {s3};
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	static LED right_led{LED::Right{}};
 	static LED left_led{LED::Left{}};
 
-	const auto value = paradiddle.value();
-	paradiddle.set_next();
+	auto pattern = Paradiddle::current();
+	const auto value = pattern->value();
+	pattern->set_next();
 
 	left_led.write(Paradiddle::left(value));
 	right_led.write(Paradiddle::right(value));
