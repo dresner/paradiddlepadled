@@ -12,9 +12,13 @@ private:
 public:
 	enum Left {};
 	enum Right {};
+	enum Up {};
+	enum Down {};
 
 	LED(const Left & left_led) : _base(GPIOD), _pin(GPIO_PIN_12) {}
+	LED(const Up & up_led) : _base(GPIOD), _pin(GPIO_PIN_13) {}
 	LED(const Right & right_led) : _base(GPIOD), _pin(GPIO_PIN_14) {}
+	LED(const Down & down_led) : _base(GPIOD), _pin(GPIO_PIN_15) {}
 
 	void write(bool onoff) { _state = onoff; HAL_GPIO_WritePin(_base, _pin, onoff ? GPIO_PIN_SET : GPIO_PIN_RESET);	}
 	void on() { write(true); }

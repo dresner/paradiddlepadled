@@ -10,6 +10,11 @@ const auto END = Paradiddle::END;
 Paradiddle * Paradiddle::_current_pattern = NULL;
 Paradiddle * Paradiddle::_last_pattern = NULL;
 
+LED Paradiddle::right_led{LED::Right{}};
+LED Paradiddle::left_led{LED::Left{}};
+LED Paradiddle::metronome_led{LED::Up{}};
+LED Paradiddle::pattern_start_led{LED::Down{}};
+
 Paradiddle::Paradiddle(const Step states[]): _head{states} {
 	_current_step = _head;
 
@@ -34,19 +39,3 @@ Paradiddle p1 {s1};
 Paradiddle p2 {s2};
 Paradiddle p3 {s3};
 
-LED right_led{LED::Right{}};
-LED left_led{LED::Left{}};
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	auto pattern = Paradiddle::current();
-	const auto value = pattern->value();
-	pattern->set_next();
-
-	left_led.write(Paradiddle::left(value));
-	right_led.write(Paradiddle::right(value));
-}
-
-void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
-	left_led.write(false);
-	right_led.write(false);
-}

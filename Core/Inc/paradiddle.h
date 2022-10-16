@@ -1,6 +1,8 @@
 #ifndef INC_PARADIDDLE_H_
 #define INC_PARADIDDLE_H_
 
+#include "halal/led.h"
+
 class Paradiddle {
 public:
 	typedef uint8_t Step;
@@ -35,6 +37,33 @@ public:
 		_current_pattern->reset();
 	}
 
+	static void metronome_fall(void) {
+		metronome_led.write(false);
+	}
+
+	static void step_fall(void) {
+		left_led.write(false);
+		right_led.write(false);
+		pattern_start_led.write(false);
+	}
+
+	static void metronome_rise(void) {
+		metronome_led.write(true);
+	}
+
+	static void step_rise(void) {
+		auto pattern = current();
+		bool start = pattern->_current_step == pattern->_head;
+		const auto value = pattern->value();
+		pattern->set_next();
+
+		left_led.write(Paradiddle::left(value));
+		right_led.write(Paradiddle::right(value));
+		if (start) {
+			pattern_start_led.write(true);
+		}
+	}
+
 private:
 	const Step * _current_step;
 	const Step * _head;
@@ -44,6 +73,11 @@ private:
 
 	static Paradiddle * _current_pattern;
 	static Paradiddle * _last_pattern;
+
+	static LED left_led;
+	static LED right_led;
+	static LED metronome_led;
+	static LED pattern_start_led;
 };
 
 #endif /* INC_PARADIDDLE_H_ */
