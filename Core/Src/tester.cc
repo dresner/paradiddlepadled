@@ -24,8 +24,13 @@ const Tester::Test Tester::_test_table[] = {
 		{"pp",   "Go to previous paradiddle pattern", Paradiddle::previous},
 };
 
+LED_Strip *led_strip;
+
 void Tester::main_loop(void) {
 	greet();
+	led_strip = new LED_Strip();
+	led_strip->off<LED_Strip::Section::Left>();
+	led_strip->off<LED_Strip::Section::Right>();
 
 	while (true) {
 		std::string command;
@@ -57,10 +62,22 @@ bool Tester::run_test(const std::string &command) {
 	return false;
 }
 
-void Tester::right_on(void) { LED{LED::Right{}}.on(); }
-void Tester::right_off(void) { LED{LED::Right{}}.off(); }
-void Tester::left_on(void) { LED{LED::Left{}}.on(); }
-void Tester::left_off(void) { LED{LED::Left{}}.off(); }
+void Tester::right_on(void) {
+	led_strip->on<LED_Strip::Section::Right>();
+	LED{LED::Right{}}.on();
+}
+void Tester::right_off(void) {
+	led_strip->off<LED_Strip::Section::Right>();
+	LED{LED::Right{}}.off();
+}
+void Tester::left_on(void) {
+	led_strip->on<LED_Strip::Section::Left>();
+	LED{LED::Left{}}.on();
+}
+void Tester::left_off(void) {
+	led_strip->off<LED_Strip::Section::Left>();
+	LED{LED::Left{}}.off();
+}
 
 void Tester::metronome_up(void) { Timer::bpm_up(10); }
 void Tester::metronome_down(void) { Timer::bpm_down(10); }

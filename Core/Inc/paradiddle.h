@@ -45,6 +45,8 @@ public:
 		left_led.write(false);
 		right_led.write(false);
 		pattern_start_led.write(false);
+		led_strip.off<LED_Strip::Section::Left>();
+		led_strip.off<LED_Strip::Section::Right>();
 	}
 
 	static void metronome_rise(void) {
@@ -59,6 +61,8 @@ public:
 
 		left_led.write(Paradiddle::left(value));
 		right_led.write(Paradiddle::right(value));
+		led_strip.write<LED_Strip::Section::Left>(Paradiddle::left(value));
+		led_strip.write<LED_Strip::Section::Right>(Paradiddle::right(value));
 		if (start) {
 			pattern_start_led.write(true);
 		}
@@ -78,6 +82,7 @@ private:
 	static LED right_led;
 	static LED metronome_led;
 	static LED pattern_start_led;
+	static LED_Strip led_strip;
 };
 
 #endif /* INC_PARADIDDLE_H_ */

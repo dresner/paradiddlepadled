@@ -1,9 +1,11 @@
 #include "halal/timer.h"
 #include "tim.h"
 #include "paradiddle.h"
+#include "ws2812b.h"
 
 auto const TIM_PARADIDDLE = &htim2;
 auto const TIM_METRONOME = &htim3;
+auto const TIM_LED_STRIP = &htim4;
 auto const CHANNEL = TIM_CHANNEL_1;
 
 bool Timer::_running = false;
@@ -51,7 +53,7 @@ void Timer::bpm_down(unsigned int how_much) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == TIM_METRONOME) {
 		Paradiddle::metronome_rise();
-	} else {
+	} else if (htim == TIM_PARADIDDLE) {
 		Paradiddle::step_rise();
 	}
 }
@@ -59,7 +61,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == TIM_METRONOME) {
 		Paradiddle::metronome_fall();
-	} else {
+	} else if (htim == TIM_PARADIDDLE) {
 		Paradiddle::step_fall();
+	} else if (htim == TIM_LED_STRIP) {
+		ws2812b_HAL_TIM_PWM_PulseFinishedCallback();
 	}
 }

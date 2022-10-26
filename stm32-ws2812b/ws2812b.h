@@ -22,8 +22,6 @@
 // Buffer allocated will be twice this
 #define BUFFER_SIZE 24
 
-#define LED_CNT 20
-
 // LED on/off counts.  PWM timer is running 104 counts.
 #define LED_OFF 14
 #define LED_ON 26
