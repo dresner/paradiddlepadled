@@ -39,7 +39,10 @@ public:
 
 	LED_Strip(void);
 
-	template<class S> void write(bool onoff);
+	template<class S> void write(bool onoff) {
+		_state<S>() = onoff;
+		_write_to_strip();
+	}
 	template<class S> void on() { write<S>(true); }
 	template<class S> void off() { write<S>(false); }
 	template<class S> void toggle() {
@@ -59,6 +62,7 @@ private:
 	}
 	bool _left_state;
 	bool _right_state;
+	void _write_to_strip();
 };
 
 typedef Onboard_LED LED;
