@@ -4,6 +4,7 @@
 #include "halal/timer.h"
 #include "tim.h"
 #include "paradiddle.h"
+#include "adc.h"
 
 Serial_Console Tester::_console;
 
@@ -22,6 +23,7 @@ const Tester::Test Tester::_test_table[] = {
 		{"m-1",  "Decrease metronome BPM by 1", Tester::metronome_down_one},
 		{"pn",   "Go to next paradiddle pattern", Paradiddle::next},
 		{"pp",   "Go to previous paradiddle pattern", Paradiddle::previous},
+		{"ads",  "ADC dump start", Tester::adc_dump_start},
 };
 
 LED_Strip *led_strip;
@@ -83,3 +85,13 @@ void Tester::metronome_up(void) { Timer::bpm_up(10); }
 void Tester::metronome_down(void) { Timer::bpm_down(10); }
 void Tester::metronome_up_one(void) { Timer::bpm_up(1); }
 void Tester::metronome_down_one(void) { Timer::bpm_down(1); }
+
+void Tester::adc_dump_start(void) {
+	while(true) {
+		HAL_ADC_Start(&hadc1);
+		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+		uint32_t value = HAL_ADC_GetValue(&hadc1);
+		HAL_ADC_Stop(&hadc1);
+		_console << std::to_string(value) << _console.endl;
+	}
+}
