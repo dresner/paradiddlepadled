@@ -256,7 +256,8 @@ uint8_t BSP_AUDIO_OUT_Play(uint16_t* pBuffer, uint32_t Size)
   else 
   {
     /* Update the Media layer and enable it for play */  
-    HAL_I2S_Transmit_DMA(&hAudioOutI2s, pBuffer, DMA_MAX(Size/AUDIODATA_SIZE)); 
+    HAL_I2S_Transmit_DMA(&hAudioOutI2s, pBuffer, DMA_MAX(Size/AUDIODATA_SIZE));
+    //HAL_I2S_Transmit(&hAudioOutI2s, pBuffer, Size, HAL_MAX_DELAY);
     
     /* Return AUDIO_OK when all operations are correctly done */
     return AUDIO_OK;
@@ -508,7 +509,7 @@ __weak void BSP_AUDIO_OUT_ClockConfig(I2S_HandleTypeDef *hi2s, uint32_t AudioFre
   if ((freqindex & 0x7) == 0)
   {
     /* I2S clock config 
-    PLLI2S_VCO = f(VCO clock) = f(PLLI2S clock input) × (PLLI2SN/PLLM)
+    PLLI2S_VCO = f(VCO clock) = f(PLLI2S clock input) ï¿½ (PLLI2SN/PLLM)
     I2SCLK = f(PLLI2S clock output) = f(VCO clock) / PLLI2SR */
     rccclkinit.PeriphClockSelection = RCC_PERIPHCLK_I2S;
     rccclkinit.PLLI2S.PLLI2SM = 8;
@@ -519,7 +520,7 @@ __weak void BSP_AUDIO_OUT_ClockConfig(I2S_HandleTypeDef *hi2s, uint32_t AudioFre
   else 
   {
     /* I2S clock config 
-    PLLI2S_VCO = f(VCO clock) = f(PLLI2S clock input) × (PLLI2SN/PLLM)
+    PLLI2S_VCO = f(VCO clock) = f(PLLI2S clock input) ï¿½ (PLLI2SN/PLLM)
     I2SCLK = f(PLLI2S clock output) = f(VCO clock) / PLLI2SR */
     rccclkinit.PeriphClockSelection = RCC_PERIPHCLK_I2S;
     rccclkinit.PLLI2S.PLLI2SM = 8;

@@ -24,6 +24,7 @@ const Tester::Test Tester::_test_table[] = {
 		{"pn",   "Go to next paradiddle pattern", Paradiddle::next},
 		{"pp",   "Go to previous paradiddle pattern", Paradiddle::previous},
 		{"ads",  "ADC dump start", Tester::adc_dump_start},
+		{"pws",  "Play WAV sample", Tester::play_wav_sample},
 };
 
 LED_Strip *led_strip;
@@ -94,4 +95,47 @@ void Tester::adc_dump_start(void) {
 		HAL_ADC_Stop(&hadc1);
 		_console << std::to_string(value) << _console.endl;
 	}
+}
+
+#include "wav_data.h"
+#include <string.h>
+#include "stm32f411e_discovery_audio.h"
+typedef enum
+{
+  BUFFER_OFFSET_NONE = 0,
+  BUFFER_OFFSET_HALF,
+  BUFFER_OFFSET_FULL,
+}BUFFER_StateTypeDef;
+
+typedef struct
+{
+  uint32_t   ChunkID;       /* 0 */
+  uint32_t   FileSize;      /* 4 */
+  uint32_t   FileFormat;    /* 8 */
+  uint32_t   SubChunk1ID;   /* 12 */
+  uint32_t   SubChunk1Size; /* 16*/
+  uint16_t   AudioFormat;   /* 20 */
+  uint16_t   NbrChannels;   /* 22 */
+  uint32_t   SampleRate;    /* 24 */
+
+  uint32_t   ByteRate;      /* 28 */
+  uint16_t   BlockAlign;    /* 32 */
+  uint16_t   BitPerSample;  /* 34 */
+  uint32_t   SubChunk2ID;   /* 36 */
+  uint32_t   SubChunk2Size; /* 40 */
+
+}WAVE_FormatTypeDef;
+__IO BUFFER_StateTypeDef BufferOffset = BUFFER_OFFSET_NONE;
+void BSP_AUDIO_OUT_HalfTransfer_CallBack(void) {
+  BufferOffset = BUFFER_OFFSET_HALF;
+}
+void BSP_AUDIO_OUT_TransferComplete_CallBack(void) {
+  BufferOffset = BUFFER_OFFSET_FULL;
+}
+void Tester::play_wav_sample(void) {
+	BufferOffset = BUFFER_OFFSET_NONE;
+	BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 70, ((WAVE_FormatTypeDef*)wav_data)->SampleRate);
+	BSP_AUDIO_OUT_Play(wav_data, sizeof(wav_data));
+	while(BufferOffset != BUFFER_OFFSET_FULL);
+	BSP_AUDIO_OUT_Stop(CODEC_PDWN_HW);
 }
