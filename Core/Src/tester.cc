@@ -94,6 +94,7 @@ void Tester::metronome_up_one(void) { Timer::bpm_up(1); }
 void Tester::metronome_down_one(void) { Timer::bpm_down(1); }
 
 void Tester::adc_dump_start(void) {
+	HAL_ADC_Stop(&hadc1);
 	while(true) {
 		HAL_ADC_Start(&hadc1);
 		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);

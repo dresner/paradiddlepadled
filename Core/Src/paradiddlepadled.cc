@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "halal/timer.h"
 #include "paradiddle.h"
+#include "adc.h"
 #include <climits>
 
 #ifdef __cplusplus
@@ -13,8 +14,18 @@ void paradiddlepadled_main(void);
 #endif
 
 void paradiddlepadled_main(void) {
+	HAL_ADC_Stop(&hadc1);
+	HAL_ADC_Start(&hadc1);
 	Tester::run_test("mon");
 	Tester::main_loop();
+}
+
+void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* hadc) {
+	__HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_EOC);
+}
+
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc) {
+
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
