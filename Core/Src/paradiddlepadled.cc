@@ -41,12 +41,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		last_up_tick = tick_now;
 		if (up_time_diff > GPIO_QUICK_TIME) {
 			Timer::bpm_up(4);
+			LED_Strip::get_instance()->reset_color();
 		} else {
 			Timer::bpm_down(4);
+			LED_Strip::get_instance()->reset_color();
 		}
 	} else {
 		if (time_diff >= GPIO_HOLD_TIME) {
 			Paradiddle::next();
+			LED_Strip::get_instance()->reset_color();
 		}
 	}
 }

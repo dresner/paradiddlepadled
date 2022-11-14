@@ -25,13 +25,15 @@ const Tester::Test Tester::_test_table[] = {
 		{"pp",   "Go to previous paradiddle pattern", Paradiddle::previous},
 		{"ads",  "ADC dump start", Tester::adc_dump_start},
 		{"pws",  "Play WAV sample", Tester::play_wav_sample},
+		{"mg",   "Add more green to the LEDs", Tester::more_green},
+		{"mr",   "Add more red to the LEDs", Tester::more_red},
 };
 
 LED_Strip *led_strip;
 
 void Tester::main_loop(void) {
 	greet();
-	led_strip = new LED_Strip();
+	led_strip = LED_Strip::get_instance();
 	led_strip->off<LED_Strip::Section::Left>();
 	led_strip->off<LED_Strip::Section::Right>();
 
@@ -66,7 +68,9 @@ bool Tester::run_test(const std::string &command) {
 }
 
 void Tester::right_on(void) {
+	led_strip->off<LED_Strip::Section::Left>();
 	led_strip->on<LED_Strip::Section::Right>();
+	LED{LED::Left{}}.off();
 	LED{LED::Right{}}.on();
 }
 void Tester::right_off(void) {
@@ -74,7 +78,9 @@ void Tester::right_off(void) {
 	LED{LED::Right{}}.off();
 }
 void Tester::left_on(void) {
+	led_strip->off<LED_Strip::Section::Right>();
 	led_strip->on<LED_Strip::Section::Left>();
+	LED{LED::Right{}}.off();
 	LED{LED::Left{}}.on();
 }
 void Tester::left_off(void) {
@@ -138,4 +144,11 @@ void Tester::play_wav_sample(void) {
 	BSP_AUDIO_OUT_Play(wav_data, sizeof(wav_data));
 	while(BufferOffset != BUFFER_OFFSET_FULL);
 	BSP_AUDIO_OUT_Stop(CODEC_PDWN_HW);
+}
+
+void Tester::more_green(void) {
+	led_strip->more_green();
+}
+void Tester::more_red(void) {
+	led_strip->more_red();
 }

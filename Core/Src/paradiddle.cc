@@ -14,7 +14,6 @@ LED Paradiddle::right_led{LED::Right{}};
 LED Paradiddle::left_led{LED::Left{}};
 LED Paradiddle::metronome_led{LED::Up{}};
 LED Paradiddle::pattern_start_led{LED::Down{}};
-LED_Strip Paradiddle::led_strip{};
 
 Paradiddle::Paradiddle(const Step states[]): _head{states} {
 	_current_step = _head;

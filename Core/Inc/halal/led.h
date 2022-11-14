@@ -29,15 +29,23 @@ public:
 };
 
 class LED_Strip {
+	LED_Strip(void);
+	~LED_Strip(void);
+
 public:
 	static const unsigned int NUM_LEDS = 50;
+
+	static LED_Strip * get_instance() {
+		if (_instance == NULL) {
+			_instance = new LED_Strip();
+		}
+		return _instance;
+	}
 
 	struct Section {
 		enum Left {};
 		enum Right {};
 	};
-
-	LED_Strip(void);
 
 	template<class S> void write(bool onoff) {
 		_state<S>() = onoff;
@@ -52,6 +60,10 @@ public:
 	}
 	template<class S> bool state() const { return _state<S>(); }
 
+	void more_green(void);
+	void more_red(void);
+	void reset_color(void);
+
 private:
 	template <class S> bool& _state() {
 		if (EQUAL<S, Section::Left>::Result) {
@@ -63,6 +75,10 @@ private:
 	bool _left_state;
 	bool _right_state;
 	void _write_to_strip();
+	void _set_strip_values();
+	uint8_t _red_value;
+	uint8_t _green_value;
+	static LED_Strip *_instance;
 };
 
 typedef Onboard_LED LED;

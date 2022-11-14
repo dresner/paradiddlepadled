@@ -25,6 +25,8 @@ private:
 	static void metronome_down_one(void);
 	static void adc_dump_start(void);
 	static void play_wav_sample(void);
+	static void more_green(void);
+	static void more_red(void);
 
 	struct Test {
 		const char *command;
