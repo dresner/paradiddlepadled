@@ -6,10 +6,11 @@
 
 class Tester {
 public:
+	Tester();
 	static void greet(void);
 
 	static bool run_test(const std::string &command);
-	static void main_loop(void);
+	static void read_console(void);
 
 private:
 	static void help(void);

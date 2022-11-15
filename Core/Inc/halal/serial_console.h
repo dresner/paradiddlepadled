@@ -7,6 +7,8 @@ class Serial_Console {
 public:
 	enum Endl { endl };
 
+	bool has_data();
+
 	Serial_Console& operator<<(const std::string &s);
 	Serial_Console& operator<<(const Endl e);
 

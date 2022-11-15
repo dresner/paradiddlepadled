@@ -24,7 +24,7 @@ const Tester::Test Tester::_test_table[] = {
 		{"pn",   "Go to next paradiddle pattern", Paradiddle::next},
 		{"pp",   "Go to previous paradiddle pattern", Paradiddle::previous},
 		{"ads",  "ADC dump start", Tester::adc_dump_start},
-		{"pws",  "Play WAV sample", Tester::play_wav_sample},
+		//{"pws",  "Play WAV sample", Tester::play_wav_sample},
 		{"mg",   "Add more green to the LEDs", Tester::more_green},
 		{"mr",   "Add more red to the LEDs", Tester::more_red},
 };
@@ -39,18 +39,19 @@ void Tester::metronome_stop(void) {
 	Timer::stop();
 	HAL_ADC_Stop(&hadc1);
 }
-void Tester::main_loop(void) {
-	greet();
+
+Tester::Tester(void) {
 	led_strip = LED_Strip::get_instance();
 	led_strip->off<LED_Strip::Section::Left>();
 	led_strip->off<LED_Strip::Section::Right>();
+	greet();
+}
 
-	while (true) {
-		std::string command;
-		_console >> command;
-		if (!run_test(command)) {
-			_console << "Unrecognized command: " << command << _console.endl;
-		}
+void Tester::read_console(void) {
+	std::string command;
+	_console >> command;
+	if (!run_test(command)) {
+		_console << "Unrecognized command: " << command << _console.endl;
 	}
 }
 
@@ -112,7 +113,7 @@ void Tester::adc_dump_start(void) {
 	}
 }
 
-#include "wav_data.h"
+//#include "wav_data.h"
 #include <string.h>
 #include "stm32f411e_discovery_audio.h"
 typedef enum
@@ -148,11 +149,11 @@ void BSP_AUDIO_OUT_TransferComplete_CallBack(void) {
   BufferOffset = BUFFER_OFFSET_FULL;
 }
 void Tester::play_wav_sample(void) {
-	BufferOffset = BUFFER_OFFSET_NONE;
-	BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 70, ((WAVE_FormatTypeDef*)wav_data)->SampleRate);
-	BSP_AUDIO_OUT_Play(wav_data, sizeof(wav_data));
-	while(BufferOffset != BUFFER_OFFSET_FULL);
-	BSP_AUDIO_OUT_Stop(CODEC_PDWN_HW);
+//	BufferOffset = BUFFER_OFFSET_NONE;
+//	BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 70, ((WAVE_FormatTypeDef*)wav_data)->SampleRate);
+//	BSP_AUDIO_OUT_Play(wav_data, sizeof(wav_data));
+//	while(BufferOffset != BUFFER_OFFSET_FULL);
+//	BSP_AUDIO_OUT_Stop(CODEC_PDWN_HW);
 }
 
 void Tester::more_green(void) {

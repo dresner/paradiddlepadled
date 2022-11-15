@@ -37,8 +37,8 @@ public:
 		_current_pattern->reset();
 	}
 
-	static void metronome_fall(void) { metronome_led.write(false); }
-	static void metronome_rise(void) { metronome_led.write(true); }
+	static void metronome_fall(void) { }
+	static void metronome_rise(void) { }
 
 	static void step_rise(void);
 	static void step_fall(void);
@@ -52,11 +52,6 @@ private:
 
 	static Paradiddle * _current_pattern;
 	static Paradiddle * _last_pattern;
-
-	static LED left_led;
-	static LED right_led;
-	static LED metronome_led;
-	static LED pattern_start_led;
 };
 
 #endif /* INC_PARADIDDLE_H_ */

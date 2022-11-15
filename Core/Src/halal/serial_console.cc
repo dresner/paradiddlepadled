@@ -1,5 +1,6 @@
 #include "halal/serial_console.h"
 #include "usart.h"
+#include "stm32f4xx_hal.h"
 
 UART_HandleTypeDef * const UART = &huart2;
 const uint32_t PUT_TIMEOUT = 1000;
@@ -35,3 +36,5 @@ Serial_Console& Serial_Console::operator>>(std::string &s) {
 	}
 	return *this;
 }
+
+bool Serial_Console::has_data(void) { return __HAL_UART_GET_FLAG(UART, UART_FLAG_RXNE); }

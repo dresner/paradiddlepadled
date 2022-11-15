@@ -3,6 +3,10 @@
 #include "paradiddle.h"
 #include <climits>
 
+#define WRAP_DIFF_UINT(x,y) (((x) < (y)) ? ((x) - (y)) : ((UINT_MAX) - (y) + (x)))
+
+static const uint32_t CORRECT_HIT_DELAY = 100;
+
 const auto L = Paradiddle::L;
 const auto R = Paradiddle::R;
 const auto LR = Paradiddle::LR;
@@ -10,11 +14,6 @@ const auto END = Paradiddle::END;
 
 Paradiddle * Paradiddle::_current_pattern = NULL;
 Paradiddle * Paradiddle::_last_pattern = NULL;
-
-LED Paradiddle::right_led{LED::Right{}};
-LED Paradiddle::left_led{LED::Left{}};
-LED Paradiddle::metronome_led{LED::Up{}};
-LED Paradiddle::pattern_start_led{LED::Down{}};
 
 Paradiddle::Paradiddle(const Step states[]): _head{states} {
 	_current_step = _head;
@@ -55,29 +54,15 @@ void Paradiddle::step_rise(void) {
 	last_rise_ticks[0] = last_rise_ticks[1];
 	last_rise_ticks[1] = HAL_GetTick();
 	auto pattern = current();
-	bool start = pattern->_current_step == pattern->_head;
 	const auto value = pattern->value();
 	pattern->set_next();
 
-	left_led.write(Paradiddle::left(value));
-	right_led.write(Paradiddle::right(value));
 	auto strip = LED_Strip::get_instance();
 	strip->write<LED_Strip::Section::Left>(Paradiddle::left(value));
 	strip->write<LED_Strip::Section::Right>(Paradiddle::right(value));
-	if (start) {
-		pattern_start_led.write(true);
-		//strip->more_red();
-	}
 }
 
-#define WRAP_DIFF_UINT(x,y) (((x) >= (y)) ? ((x) - (y)) : ((UINT_MAX) - (y) + (x)))
-
-static const uint32_t CORRECT_HIT_DELAY = 100;
-
 void Paradiddle::step_fall(void) {
-	left_led.write(false);
-	right_led.write(false);
-	pattern_start_led.write(false);
 	auto strip = LED_Strip::get_instance();
 	strip->off<LED_Strip::Section::Left>();
 	strip->off<LED_Strip::Section::Right>();
