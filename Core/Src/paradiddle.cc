@@ -2,6 +2,7 @@
 #include "halal/led.h"
 #include "paradiddle.h"
 #include <climits>
+#include "state_machine.h"
 
 #define WRAP_DIFF_UINT(x,y) (((x) < (y)) ? ((x) - (y)) : ((UINT_MAX) - (y) + (x)))
 
@@ -51,15 +52,33 @@ void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc) {
 }
 
 void Paradiddle::step_rise(void) {
+	static uint8_t steps_count = 0;
+
 	last_rise_ticks[0] = last_rise_ticks[1];
 	last_rise_ticks[1] = HAL_GetTick();
 	auto pattern = current();
+	bool start = pattern->_current_step == pattern->_head;
 	const auto value = pattern->value();
 	pattern->set_next();
 
-	auto strip = LED_Strip::get_instance();
-	strip->write<LED_Strip::Section::Left>(Paradiddle::left(value));
-	strip->write<LED_Strip::Section::Right>(Paradiddle::right(value));
+	bool light_up = true;
+
+	if (State_Machine::is_loose(State_Machine::current_state->state)) {
+		if (start) {
+			steps_count = 0;
+		} else {
+			++steps_count;
+		}
+		if (steps_count % 4) {
+			light_up = false;
+		}
+	}
+
+	if (light_up) {
+		auto strip = LED_Strip::get_instance();
+		strip->write<LED_Strip::Section::Left>(Paradiddle::left(value));
+		strip->write<LED_Strip::Section::Right>(Paradiddle::right(value));
+	}
 }
 
 void Paradiddle::step_fall(void) {
