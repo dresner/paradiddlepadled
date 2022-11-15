@@ -15,8 +15,8 @@ const Tester::Test Tester::_test_table[] = {
 		{"roff", "Turn off LED indicator of Right hit", Tester::right_off},
 		{"lon",  "Turn on LED indicator of Left hit", Tester::left_on},
 		{"loff", "Turn off LED indicator of Left hit", Tester::left_off},
-		{"mon",  "Start metronome", Timer::start},
-		{"moff", "Stop metronome", Timer::stop},
+		{"mon",  "Start metronome", Tester::metronome_start},
+		{"moff", "Stop metronome", Tester::metronome_stop},
 		{"m+",   "Increase metronome BPM by 10", Tester::metronome_up},
 		{"m-",   "Decrease metronome BPM by 10", Tester::metronome_down},
 		{"m+1",  "Increase metronome BPM by 1", Tester::metronome_up_one},
@@ -31,6 +31,14 @@ const Tester::Test Tester::_test_table[] = {
 
 LED_Strip *led_strip;
 
+void Tester::metronome_start(void) {
+	HAL_ADC_Start(&hadc1);
+	Timer::start();
+}
+void Tester::metronome_stop(void) {
+	Timer::stop();
+	HAL_ADC_Stop(&hadc1);
+}
 void Tester::main_loop(void) {
 	greet();
 	led_strip = LED_Strip::get_instance();

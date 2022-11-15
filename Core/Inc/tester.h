@@ -17,6 +17,8 @@ private:
 	static void right_off(void);
 	static void left_on(void);
 	static void left_off(void);
+	static void metronome_start(void);
+	static void metronome_stop(void);
 	static void metronome_on(void);
 	static void metronome_off(void);
 	static void metronome_up(void);

@@ -63,7 +63,7 @@ void MX_ADC1_Init(void)
   /** Configure the analog watchdog
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG;
-  AnalogWDGConfig.HighThreshold = 250;
+  AnalogWDGConfig.HighThreshold = 255;
   AnalogWDGConfig.LowThreshold = 0;
   AnalogWDGConfig.Channel = ADC_CHANNEL_14;
   AnalogWDGConfig.ITMode = ENABLE;

@@ -37,39 +37,11 @@ public:
 		_current_pattern->reset();
 	}
 
-	static void metronome_fall(void) {
-		metronome_led.write(false);
-	}
+	static void metronome_fall(void) { metronome_led.write(false); }
+	static void metronome_rise(void) { metronome_led.write(true); }
 
-	static void step_fall(void) {
-		left_led.write(false);
-		right_led.write(false);
-		pattern_start_led.write(false);
-		auto strip = LED_Strip::get_instance();
-		strip->off<LED_Strip::Section::Left>();
-		strip->off<LED_Strip::Section::Right>();
-	}
-
-	static void metronome_rise(void) {
-		metronome_led.write(true);
-	}
-
-	static void step_rise(void) {
-		auto pattern = current();
-		bool start = pattern->_current_step == pattern->_head;
-		const auto value = pattern->value();
-		pattern->set_next();
-
-		left_led.write(Paradiddle::left(value));
-		right_led.write(Paradiddle::right(value));
-		auto strip = LED_Strip::get_instance();
-		strip->write<LED_Strip::Section::Left>(Paradiddle::left(value));
-		strip->write<LED_Strip::Section::Right>(Paradiddle::right(value));
-		if (start) {
-			pattern_start_led.write(true);
-			strip->more_red();
-		}
-	}
+	static void step_rise(void);
+	static void step_fall(void);
 
 private:
 	const Step * _current_step;

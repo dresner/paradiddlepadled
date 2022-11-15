@@ -76,9 +76,8 @@ private:
 	bool _right_state;
 	void _write_to_strip();
 	void _set_strip_values();
-	uint8_t _red_value;
-	uint8_t _green_value;
 	static LED_Strip *_instance;
+	uint8_t _current_accuracy_level;
 };
 
 typedef Onboard_LED LED;

@@ -44,7 +44,7 @@ uint16_t dma_buffer[BUFFER_SIZE * 2] = { 0 };
 uint16_t *dma_buffer_pointer;
 
 // LED RGB values - malloc'ed in init when size is known.  3 bytes per led.
-uint8_t *led_value;
+volatile uint8_t *led_value;
 
 // Variables controlling the state machine.
 uint8_t led_state = LED_RES;
@@ -146,7 +146,7 @@ void ws2812b_HAL_TIM_PWM_PulseFinishedCallback(void) {
 }
 
 void zeroLedValues() {
-	memset(led_value, 0, leds * 3); // Zero it all
+	memset((void*)led_value, 0, leds * 3); // Zero it all
 	is_dirty = true; // Mark buffer dirty
 }
 
@@ -182,7 +182,7 @@ uint8_t ws2812b_init(TIM_HandleTypeDef *init_timer, uint32_t init_channel,
 	led_value = (uint8_t*)malloc(leds * 3);
 	if (led_value != NULL) { // Memory for led values
 
-		memset(led_value, 0, leds * 3); // Zero it all
+		memset((void*)led_value, 0, leds * 3); // Zero it all
 
 		// Start DMA to feed the PWM with values
 		// At this point the buffer should be empty - all zeros
