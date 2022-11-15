@@ -65,6 +65,7 @@ public:
 	static void event_bpm_down(void);
 	static void event_pattern_next(void);
 	static void event_pattern_previous(void);
+	static void toggle_onoff(void);
 };
 
 #endif /* INC_STATE_MACHINE_H_ */

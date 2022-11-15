@@ -7,32 +7,49 @@
 
 static const uint32_t BUTTON_QUICK_TIME = 500;
 static const uint32_t BUTTON_HOLD_TIME = 1000;
+static const uint32_t BUTTON_LONG_HOLD_TIME = 2000;
 
 static volatile uint32_t button_stream_start = UINT_MAX;
 static volatile bool button_is_pressed = false;
 volatile uint8_t Button::button_presses = 0;
 
 void Button::handle_button_event(void) {
+	bool hold_processed = false;
 	while (true) {
+		uint32_t now;
 		if (Button::button_presses >= 3) {
 			State_Machine::transition_event_1();
 			break;
 		}
-		uint32_t now = HAL_GetTick();
-		if (button_is_pressed) {
+		while (button_is_pressed) {
+			now = HAL_GetTick();
 			if (WRAP_DIFF_UINT(button_stream_start, now) >= BUTTON_HOLD_TIME) {
 				State_Machine::transition_event_2();
+				hold_processed = true;
 				break;
 			}
-		} else {
-			if (WRAP_DIFF_UINT(button_stream_start, now) >= BUTTON_QUICK_TIME) {
-				if (Button::button_presses == 1) {
-					State_Machine::current_state->event_1();
-					break;
-				} else if (button_presses == 2) {
-					State_Machine::current_state->event_2();
-					break;
-				}
+		}
+		while (button_is_pressed) {
+			now = HAL_GetTick();
+			if (WRAP_DIFF_UINT(button_stream_start, now) >= BUTTON_LONG_HOLD_TIME) {
+				State_Machine::toggle_onoff();
+				State_Machine::transition_event_2();
+				hold_processed = true;
+				break;
+			}
+		}
+		if (hold_processed) {
+			break;
+		}
+
+		now = HAL_GetTick();
+		if (WRAP_DIFF_UINT(button_stream_start, now) >= BUTTON_QUICK_TIME) {
+			if (Button::button_presses == 1) {
+				State_Machine::current_state->event_1();
+				break;
+			} else if (button_presses == 2) {
+				State_Machine::current_state->event_2();
+				break;
 			}
 		}
 	}
@@ -41,7 +58,7 @@ void Button::handle_button_event(void) {
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	static const uint32_t GPIO_DEBOUNCE_TIME = 5;
+	static const uint32_t GPIO_DEBOUNCE_TIME = 10;
 	static uint32_t last_tick = 0;
 
 	if (GPIO_Pin != GPIO_USER_BUTTON_Pin) {

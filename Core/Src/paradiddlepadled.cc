@@ -1,4 +1,5 @@
 #include "tester.h"
+#include "adc.h"
 #include "halal/timer.h"
 #include "halal/button.h"
 #include "halal/led.h"
@@ -15,8 +16,10 @@ void paradiddlepadled_main(void);
 
 void paradiddlepadled_main(void) {
 	State_Machine::reset();
+	State_Machine::toggle_onoff();
+
 	Tester tester;
-	tester.run_test("mon");
+
 	while(true) {
 		Serial_Console console;
 		if (console.has_data()) {
@@ -28,6 +31,17 @@ void paradiddlepadled_main(void) {
 	}
 }
 
+void State_Machine::toggle_onoff(void) {
+	static bool on = false;
+	on = !on;
+	if (on) {
+		HAL_ADC_Start(&hadc1);
+		Timer::start();
+	} else {
+		Timer::stop();
+		HAL_ADC_Stop(&hadc1);
+	}
+}
 void State_Machine::event_bpm_up(void) {
 	Timer::bpm_up(4);
 	LED_Strip::get_instance()->reset_color();
