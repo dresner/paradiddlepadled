@@ -4,14 +4,7 @@
 #include <climits>
 #include "state_machine.h"
 
-#define WRAP_DIFF_UINT(x,y) (((x) < (y)) ? ((x) - (y)) : ((UINT_MAX) - (y) + (x)))
-
-static const uint32_t CORRECT_HIT_DELAY = 100;
-
-const auto L = Paradiddle::L;
-const auto R = Paradiddle::R;
-const auto LR = Paradiddle::LR;
-const auto END = Paradiddle::END;
+static const uint32_t CORRECT_HIT_DELAY = 10;
 
 Paradiddle * Paradiddle::_current_pattern = NULL;
 Paradiddle * Paradiddle::_last_pattern = NULL;
@@ -33,45 +26,87 @@ Paradiddle::Paradiddle(const Step states[]): _head{states} {
 	}
 }
 
-const Paradiddle::Step s1[] {R, L, R, R, L, R, L, L, END};
-const Paradiddle::Step s2[] {R, L, R, R, L, L, END};
-const Paradiddle::Step s3[] {L, R, L, L, R, R, END};
-Paradiddle p1 {s1};
-Paradiddle p2 {s2};
-Paradiddle p3 {s3};
+static const auto L = Paradiddle::L;
+static const auto R = Paradiddle::R;
+static const auto END = Paradiddle::END;
+
+static Paradiddle p1 {(const Paradiddle::Step[]){R, L, R, R, L, R, L, L, END}};
+static Paradiddle p2 {(const Paradiddle::Step[]){R, L, R, R, L, L, END}};
+static Paradiddle p3 {(const Paradiddle::Step[]){L, R, L, L, R, R, END}};
+
+static volatile uint32_t last_hit_tick = UINT_MAX;
+static volatile uint32_t last_rise_ticks[2] = {0,0};
+static volatile uint8_t steps_count = 0;
+
+// Not a generic circular buffer.
+// It fulfills specific assumptions and requirements for usage in this file
+template<typename T, size_t Size>
+class Circular_Buffer {
+public:
+	Circular_Buffer() : _write_head{0}, _read_head{0} {}
+
+	void operator <<(const T item) {
+		_data[_write_head] = item;
+		_write_head = (_write_head + 1) % Size;
+	}
+	void operator >>(T& item) {
+		item = _data[_read_head];
+		_read_head = (_read_head + 1) % Size;
+	}
+	T get_previous() {
+		if (_read_head == 0) {
+			return _data[Size-1];
+		}
+		return _data[_read_head - 1];
+	}
+	size_t write_head() { return _write_head; }
+	size_t read_head() { return _read_head; }
+
+private:
+	T _data[Size];
+	volatile size_t _write_head;
+	volatile size_t _read_head;
+};
+static Circular_Buffer<uint32_t, 32> hit_timestamps {};
+static Circular_Buffer<uint32_t, 2> rise_timestamps {};
+static volatile size_t last_hit_index {0};
+
+static uint32_t DEBOUNCE_ADC_DELAY = 10;
+
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc) {
+	static uint32_t last_tick = 0;
+	uint32_t tick = HAL_GetTick();
+	if (tick <= last_tick + DEBOUNCE_ADC_DELAY) return;
+	last_tick = tick;
+	hit_timestamps << HAL_GetTick();
+}
 
 void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* hadc) {
 	__HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_EOC);
 }
 
-static volatile uint32_t last_hit_tick = UINT_MAX;
-static volatile uint32_t last_rise_ticks[2] = {0,0};
-
-void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc) {
-	last_hit_tick = HAL_GetTick();
+void Paradiddle::reset_step() {
+	_current_step = _head;
+	last_hit_tick = UINT_MAX;
+	last_rise_ticks[0] = 0;
+	last_rise_ticks[1] = 0;
+	steps_count = 0;
 }
 
 void Paradiddle::step_rise(void) {
-	static uint8_t steps_count = 0;
-
-	last_rise_ticks[0] = last_rise_ticks[1];
-	last_rise_ticks[1] = HAL_GetTick();
-	auto pattern = current();
-	bool start = pattern->_current_step == pattern->_head;
+	rise_timestamps << HAL_GetTick();
+	last_hit_index = hit_timestamps.write_head();
+	auto pattern = current_pattern();
 	const auto value = pattern->value();
-	pattern->set_next();
+	pattern->next_step();
 
 	bool light_up = true;
 
 	if (State_Machine::is_loose(State_Machine::current_state->state)) {
-		if (start) {
-			steps_count = 0;
-		} else {
-			++steps_count;
-		}
-		if (steps_count % 4) {
+		if (steps_count != 0) {
 			light_up = false;
 		}
+		steps_count = (steps_count + 1) % 4;
 	}
 
 	if (light_up) {
@@ -82,20 +117,25 @@ void Paradiddle::step_rise(void) {
 }
 
 void Paradiddle::step_fall(void) {
+	uint32_t tick1, tick2;
+	tick1 = rise_timestamps.get_previous();
+	rise_timestamps >> tick2;
+
 	auto strip = LED_Strip::get_instance();
 	strip->off<LED_Strip::Section::Left>();
 	strip->off<LED_Strip::Section::Right>();
-	uint32_t time_diff0, time_diff1;
 
-	time_diff0 = WRAP_DIFF_UINT(last_hit_tick, last_rise_ticks[0]);
-	if (time_diff0 <= CORRECT_HIT_DELAY) {
-		strip->more_green();
-	} else {
-		time_diff1 = WRAP_DIFF_UINT(last_hit_tick, last_rise_ticks[1]);
-		if (time_diff1 <= CORRECT_HIT_DELAY) {
-			strip->more_green();
-		} else {
-			strip->more_red();
-		}
-	}
+	volatile size_t t;
+    while ((t = hit_timestamps.read_head()) != last_hit_index) {
+    	uint32_t hit;
+    	hit_timestamps >> hit;
+    	// Not considering timestamp wrap. Should be rare and low-impact enough not to matter.
+    	if (hit <= tick1 + CORRECT_HIT_DELAY) {
+    		strip->more_green();
+    	} else if (hit >= tick2 - CORRECT_HIT_DELAY) {
+    		strip->more_green();
+    	} else {
+    		strip->more_red();
+    	}
+    }
 }

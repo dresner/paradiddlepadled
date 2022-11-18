@@ -51,10 +51,10 @@ void State_Machine::event_bpm_down(void) {
 	LED_Strip::get_instance()->reset_color();
 }
 void State_Machine::event_pattern_next(void) {
-    Paradiddle::next();
+    Paradiddle::next_pattern();
 	LED_Strip::get_instance()->reset_color();
 }
 void State_Machine::event_pattern_previous(void) {
-	Paradiddle::previous();
+	Paradiddle::previous_pattern();
 	LED_Strip::get_instance()->reset_color();
 }

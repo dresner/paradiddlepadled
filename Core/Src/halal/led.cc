@@ -21,7 +21,7 @@ void LED_Strip::_set_strip_values(void) {
 }
 
 void LED_Strip::reset_color() {
-	_current_accuracy_level = 0;
+	_current_accuracy_level = NUM_ACCURACY_LEVELS / 2 - 1;
 	led_value_l_now = led_value_l[_current_accuracy_level];
 	led_value_r_now = led_value_r[_current_accuracy_level];
 	_set_strip_values();
