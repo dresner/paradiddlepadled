@@ -4,7 +4,7 @@
 #include <climits>
 #include "state_machine.h"
 
-static const uint32_t CORRECT_HIT_DELAY = 10;
+static const uint32_t CORRECT_HIT_DELAY = 20;
 
 Paradiddle * Paradiddle::_current_pattern = NULL;
 Paradiddle * Paradiddle::_last_pattern = NULL;
@@ -63,7 +63,7 @@ public:
 	size_t read_head() { return _read_head; }
 
 private:
-	T _data[Size];
+	volatile T _data[Size];
 	volatile size_t _write_head;
 	volatile size_t _read_head;
 };
@@ -117,9 +117,18 @@ void Paradiddle::step_rise(void) {
 }
 
 void Paradiddle::step_fall(void) {
-	uint32_t tick1, tick2;
+	uint32_t tick1, tick2, tick3;
 	tick1 = rise_timestamps.get_previous();
 	rise_timestamps >> tick2;
+
+	// FIXME: something's wrong here. There should always be a step_rise
+	// before a step_fall, so this condition should never happen, but it
+	// is happening
+	if (tick2 < tick1) {
+		tick3 = tick1;
+		tick1 = tick2;
+		tick2 = tick3;
+	}
 
 	auto strip = LED_Strip::get_instance();
 	strip->off<LED_Strip::Section::Left>();

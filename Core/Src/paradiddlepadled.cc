@@ -29,7 +29,6 @@ void paradiddlepadled_main(void) {
 	State_Machine::toggle_onoff();
 
 	Tester tester;
-
 	while(true) {
 		Serial_Console console;
 		if (console.has_data()) {
