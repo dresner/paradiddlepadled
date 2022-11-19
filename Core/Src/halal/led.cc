@@ -1,5 +1,5 @@
 #include "halal/led.h"
-#include "tim.h"
+#include "halal/timer.h"
 #include <ws2812b.h>
 
 static const uint8_t NUM_ACCURACY_LEVELS = 10;
@@ -65,10 +65,10 @@ LED_Strip::LED_Strip(void) {
 			led_value_r[level][3 * led + RL] = red_value;
 		}
 	}
+	ws2812b_init(TIM_LED_STRIP, TIM_CHANNEL_LED, NUM_LEDS);
 	_write_to_strip();
-	ws2812b_init(&htim4, TIM_CHANNEL_1, NUM_LEDS);
-	HAL_TIM_Base_Start(&htim4);
-	HAL_TIM_PWM_Start_IT(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_Base_Start(TIM_LED_STRIP);
+	HAL_TIM_PWM_Start_IT(TIM_LED_STRIP, TIM_CHANNEL_LED);
 }
 
 void LED_Strip::_write_to_strip() {

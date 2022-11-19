@@ -1,27 +1,27 @@
 #include "halal/timer.h"
-#include "tim.h"
 #include "paradiddle.h"
 #include "ws2812b.h"
 
-auto const TIM_PARADIDDLE = &htim2;
-auto const TIM_METRONOME = &htim3;
-auto const TIM_LED_STRIP = &htim4;
-auto const CHANNEL = TIM_CHANNEL_1;
+TIM_HandleTypeDef* const TIM_LED_STRIP = &htim4;
+TIM_HandleTypeDef* const TIM_PARADIDDLE = &htim2;
+TIM_HandleTypeDef* const TIM_METRONOME = &htim3;
+uint32_t const TIM_CHANNEL = TIM_CHANNEL_1;
+uint32_t const TIM_CHANNEL_LED = TIM_CHANNEL_2;
 
 bool Timer::_running = false;
 
 void Timer::start(void) {
 	HAL_TIM_Base_Start_IT(TIM_METRONOME);
-	HAL_TIM_PWM_Start_IT(TIM_METRONOME, CHANNEL);
+	HAL_TIM_PWM_Start_IT(TIM_METRONOME, TIM_CHANNEL);
 	HAL_TIM_Base_Start_IT(TIM_PARADIDDLE);
-	HAL_TIM_PWM_Start_IT(TIM_PARADIDDLE, CHANNEL);
+	HAL_TIM_PWM_Start_IT(TIM_PARADIDDLE, TIM_CHANNEL);
 	_running = true;
 }
 
 void Timer::stop(void) {
-	HAL_TIM_PWM_Stop_IT(TIM_PARADIDDLE, CHANNEL);
+	HAL_TIM_PWM_Stop_IT(TIM_PARADIDDLE, TIM_CHANNEL);
 	HAL_TIM_Base_Stop_IT(TIM_PARADIDDLE);
-	HAL_TIM_PWM_Stop_IT(TIM_METRONOME, CHANNEL);
+	HAL_TIM_PWM_Stop_IT(TIM_METRONOME, TIM_CHANNEL);
 	HAL_TIM_Base_Stop_IT(TIM_METRONOME);
 	_running = false;
 }

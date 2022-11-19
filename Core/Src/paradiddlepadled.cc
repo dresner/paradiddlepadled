@@ -5,6 +5,7 @@
 #include "halal/led.h"
 #include "paradiddle.h"
 #include "state_machine.h"
+#include "stm32f411e_discovery_accelerometer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,6 +16,15 @@ void paradiddlepadled_main(void);
 #endif
 
 void paradiddlepadled_main(void) {
+	/* Initialize MEMS Accelerometer mounted on STM32F4-Discovery board */
+	if(BSP_ACCELERO_Init() != ACCELERO_OK)
+	{
+		/* Initialization Error */
+		Error_Handler();
+	}
+
+	/* Enable click config for pause/play */
+	BSP_ACCELERO_Click_ITConfig();
 	State_Machine::reset();
 	State_Machine::toggle_onoff();
 
@@ -25,9 +35,7 @@ void paradiddlepadled_main(void) {
 		if (console.has_data()) {
 			tester.read_console();
 		}
-		if (Button::button_was_pressed()) {
-			Button::handle_button_event();
-		}
+		Button::check_events();
 	}
 }
 
