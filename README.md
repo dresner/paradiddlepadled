@@ -2,9 +2,10 @@
 
 A pad with LED's for practicing Paradiddles.
 
-Final project submission for Making Embedded Systems - Yellow Seahorses ![[figures/f8e313e911ab5339972f85cb3838edf5.png]] cohort by Elecia White and Classpert (https://classpert.com/classpertx/courses/making-embedded-systems/cohort)
+Final project submission for Making Embedded Systems - Yellow Seahorses ![Yellow Seahorse](figures/f8e313e911ab5339972f85cb3838edf5.png) cohort by Elecia White and Classpert (https://classpert.com/classpertx/courses/making-embedded-systems/cohort)
 
-![[figures/Paradiddlepadled.gif]]
+![The Paradiddlepadled](figures/Paradiddlepadled.gif)
+
 *Figure 1 - The Paradiddlepadled*
 
 # Bill of Materials
@@ -28,7 +29,9 @@ This is the full list of materials used in this version of the system. Many of t
 
 Practicing music can be pretty boring. Could it be fun if it were pretty?
 
-## Electronic drum kit![[figures/IMG_20220902_104122 1.jpg]]
+## Electronic drum kit
+![An electronic drum kit](figures/IMG_20220902_104122%201.jpg)
+
 *Figure 2 - An electronic drum kit*
 
 An electronic drum kit is a musical instrument that mimics the acoustic drums, consisting of several pads that the user can hit. 
@@ -50,7 +53,8 @@ Doing paradiddles feels as much fun as trying to understand the previous sentenc
 ## The Paradiddlepadled
 
 Let’s try to make paradiddles fun!
-![[figures/craiyon_220252_having_fun_practicing_the_drums_with_LEDs_br_.png]]
+![AI-generated art for "Having fun practicing the drums with LEDs"](figures/craiyon_220252_having_fun_practicing_the_drums_with_LEDs_br_.png)
+
 *Figure 3 - The joys of Computer Science in late 2022*
 
 The Paradiddlepadled is a single electronic drum pad involved in LED's connected to a microcontroller.
@@ -63,22 +67,23 @@ The microcontroller board has controls to set the paradiddle pattern, the operat
 
 # Hardware Description
 
-### Hardware Block Diagram
-![[figures/Paradiddlepadled_hardware_block_diagram.svg]]
+## Hardware Block Diagram
+![Hardware Block Diagram](figures/Paradiddlepadled_hardware_block_diagram.svg)
+
 *Figure 4 - Hardware Block Diagram*
 
 ## Pin connections
 
-P4 adapter VCC 1 - LED Strip VCC
-P4 adapter GND 1 - LED Strip GND
-P4 adapter GND 2 - Board GND
-J10 adapter GND - Board GND
-J10 adapter signal - Board PC4 (ADC1 IN)
-LED Strip signal - Board PB7 (TIM4 PWM CH2)
-FTDI GND - Board GND
-FTDI CTS - Board PD4 (USART 2 RTS)
-FTDI TX - Board PA3 (USART 2 RX)
-FTDI RX - Board PA2 (USART 2 TX)
+* P4 adapter VCC 1 - LED Strip VCC
+* P4 adapter GND 1 - LED Strip GND
+* P4 adapter GND 2 - Board GND
+* J10 adapter GND - Board GND
+* J10 adapter signal - Board PC4 (ADC1 IN)
+* LED Strip signal - Board PB7 (TIM4 PWM CH2)
+* FTDI GND - Board GND
+* FTDI CTS - Board PD4 (USART 2 RTS)
+* FTDI TX - Board PA3 (USART 2 RX)
+* FTDI RX - Board PA2 (USART 2 TX)
 
 ## Microcontroller
 
@@ -89,13 +94,17 @@ The Paradiddlepadled runs on the STM 32F411EDISCOVERY board (https://www.st.com/
 ### Serial Console (USART)
 
 An FT232RL board was used to to be able to communicate with the system through a serial console. It acts as a mini USB <-> RS232 adapter. The pins RX, TX, CTS, and GND were connected to the disco board and USART2 was used in Asynchronous mode and RTS Only hardware flow control.
-![[figures/FTDI.webp]]
+
+![FTDI board](figures/FTDI.webp)
+
 *Figure 5 - FTDI board*
 
 ### Electronic Drum Pad (ADC)
 
 The pad was taken from an electronic drum kit. It consists of a round pad of rubber or other material that the user hits. Inside it there is a piezoelectric sensor that detects the force applied to the hit and outputs an analog signal to a J10 jack. A P10-P10 mono audio cable is attached to the jack and to a J10 connector for PCB's. Two of the terminals are then connected via alligator jumpers to GND and PC4 on the disco board.
-![[figures/IMG_20221120_235001.jpg]]
+
+![Connecting the pad to the board](figures/IMG_20221120_235001.jpg)
+
 *Figure 6 - Connecting the pad to the board*
 
 The PC4 pin is set as ADC input, and the "Analog Watchdog" feature is used to trigger an interrupt when the ADC reads above a threshold. To find a good threshold, the ADC was configured to 10 bits accuracy and the board was programmed to constantly read the ADC and output to serial. With this, the "Serial Oscilloscope" application (https://github.com/xioTechnologies/Serial-Oscilloscope) was used to plot readings for different hit forces. A threshold value of 200 was selected. A debounce of 10ms was also implemented on the interrupt handler. 
@@ -109,33 +118,41 @@ An individually-addressable RGB LED strip was selected for maximum flexibility. 
 #### Powering the LED's
 To power the LED's, some calculations were necessary to select an appropriate power supply. At 5V, the strip is advertised to consume a maximum of 14.4 W/m, so:
 
+```
 (14.4 W/m) / (60 LED/m) = 0.24 W/LED
 0.24 W/LED * 50 LED = 12 W
 12 W / 5 V = 2.4 A
+```
 
 Thus 2.4A is the maximum consumption of the strip at 5V, if all the LED's are on at maximum brightness.
 
 To calculate the maximum possible consumption of the disco board, it was noted that it can be powered by a USB 2.0 cable. The USB 2.0 standard indicates a maximum 2.5W @ 5V = 500mA.
 
 With that, a power supply of at least 2.9A @ 5V would be enough to power the board and the LED's at full power. In the end, a cheap- and small-enough 5V 5A wall-mount power supply was found and used for this project. This power supply has a P4 connector, so a P4 jack adapter was necessary to connect to the main board and LED strip with jumpers.
-![[figures/P4_adapter.png]]
+
+![P4 adapter](figures/P4_adapter.png)
+
 *Figure 7 - P4 adapter*
 
 #### Controlling the LED's
 
 The WS2812 strip communication defines a one-wire protocol that takes 3 bytes of data per LED, representing its Red, Green, and Blue values. Each bit is represented by a pulse:
-![[figures/WS2812_pulse.png]]
+
+![WS2812 LED pulse timing diagram](figures/WS2812_pulse.png)
+
 *Figure 8 - WS2812 LED pulse timing diagram*
 
 With specific timing:
-![[figures/Pasted image 20221120175935.png]]
+
+![WS2812 LED pulse timing table](figures/Pasted%20image%2020221120175935.png)
+
 *Figure 9 - WS2812 LED pulse timing table*
 
 To achieve this control, a timer was configured with PWM to read data from DMA and generate a pulse representing each bit on a GPIO pin. Each pulse has to be 1.25µs, so the timer was configured with a 32 MHz input clock and a Counter Period value of 40:
-
+```
 32 MHz / 40 = 0.8 MHz
 1 / 0.8 MHz = 1.25µs
-
+```
 The PWM Pulse value is determined by the DMA data.
 
 References:
@@ -176,7 +193,9 @@ The software is written in C++, taking advantaged of STM32CubeIDE facilities to 
 Note: the software could use a few rounds of refactoring. Design choices are not 100% consistent between modules (for example, some classes use static methods and some use a singleton object pattern), and organization could be improved (e.g. accelerometer logic is mixed with the button module). Since it is very hard to get to a perfect design in the realm of ideas, I usually start coding before spending too much time thinking about the code design. I let it emerge naturally as I write a few modules and get a better practical understanding of the code's needs. Then I come back and refactor some pieces. Although some refactors were done, this project has not reached the necessary level of maturity yet.
 
 ## Software Block Diagram
-![[figures/Paradiddlepadled_software_block_diagram.svg]]
+
+![Software Block Diagram](figures/Paradiddlepadled_software_block_diagram.svg)
+
 *Figure 10 - Software Block Diagram*
 
 ## Paradiddle
@@ -192,8 +211,9 @@ The `Paradiddle` class handles the ADC hit detection interrupt, as well as timer
 
 ## State Machine
 \[`Core/Src/state_machine.cc`, `Core/Inc/state_machine.h`\]
-![[figures/Pasted image 20221120194220.png]]
-*Figure 11 - State Machine table*
+![Software State Machine table](figures/Pasted%20image%2020221120194220.png)
+
+*Figure 11 - Software State Machine table*
 
 The state machine can be in one of 4 states. Each state represents if it is currently controlling the BPM or the pattern, and also if it is in Guided or Loose operation mode. Each state also has a combination of two on-board LED's that it lights up uniquely.
 
