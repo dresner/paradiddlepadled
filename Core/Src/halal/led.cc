@@ -3,7 +3,7 @@
 #include <ws2812b.h>
 
 static const uint8_t NUM_ACCURACY_LEVELS = 10;
-static const uint8_t LED_VALUE_STEP = 20;
+static const uint8_t LED_VALUE_STEP = 5;
 static const uint8_t LED_VALUE_MAX = (NUM_ACCURACY_LEVELS-1) * LED_VALUE_STEP;
 
 extern bool is_dirty;

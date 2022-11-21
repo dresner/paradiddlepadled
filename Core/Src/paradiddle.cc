@@ -32,7 +32,7 @@ static const auto END = Paradiddle::END;
 
 static Paradiddle p1 {(const Paradiddle::Step[]){R, L, R, R, L, R, L, L, END}};
 static Paradiddle p2 {(const Paradiddle::Step[]){R, L, R, R, L, L, END}};
-static Paradiddle p3 {(const Paradiddle::Step[]){L, R, L, L, R, R, END}};
+static Paradiddle p3 {(const Paradiddle::Step[]){R, R, L, L, END}};
 
 static volatile uint32_t last_hit_tick = UINT_MAX;
 static volatile uint32_t last_rise_ticks[2] = {0,0};
@@ -134,8 +134,7 @@ void Paradiddle::step_fall(void) {
 	strip->off<LED_Strip::Section::Left>();
 	strip->off<LED_Strip::Section::Right>();
 
-	volatile size_t t;
-    while ((t = hit_timestamps.read_head()) != last_hit_index) {
+    while (hit_timestamps.read_head() != last_hit_index) {
     	uint32_t hit;
     	hit_timestamps >> hit;
     	// Not considering timestamp wrap. Should be rare and low-impact enough not to matter.

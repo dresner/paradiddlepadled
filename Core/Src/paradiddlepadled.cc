@@ -49,12 +49,15 @@ void State_Machine::toggle_onoff(void) {
 		HAL_ADC_Stop(&hadc1);
 	}
 }
+
+static const uint8_t BPM_ADJUST = 10;
+
 void State_Machine::event_bpm_up(void) {
-	Timer::bpm_up(4);
+	Timer::bpm_up(BPM_ADJUST);
 	LED_Strip::get_instance()->reset_color();
 }
 void State_Machine::event_bpm_down(void) {
-	Timer::bpm_down(4);
+	Timer::bpm_down(BPM_ADJUST);
 	LED_Strip::get_instance()->reset_color();
 }
 void State_Machine::event_pattern_next(void) {
