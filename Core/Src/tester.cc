@@ -56,7 +56,7 @@ void Tester::read_console(void) {
 }
 
 void Tester::greet(void) {
-	_console << "Hi! Welcome to Paradiddlepadled Tester v1.1" << _console.endl;
+	_console << "Hi! Welcome to Paradiddlepadled Tester v1.2dev" << _console.endl;
 }
 
 void Tester::help(void) {
