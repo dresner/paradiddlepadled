@@ -3,6 +3,7 @@
 #include "paradiddle.h"
 #include <climits>
 #include "state_machine.h"
+#include <cassert>
 
 static const uint32_t CORRECT_HIT_DELAY = 20;
 
@@ -71,14 +72,28 @@ static Circular_Buffer<uint32_t, 32> hit_timestamps {};
 static Circular_Buffer<uint32_t, 2> rise_timestamps {};
 static volatile size_t last_hit_index {0};
 
-static uint32_t DEBOUNCE_ADC_DELAY = 10;
+static uint32_t n_adc_zeros_in_a_row = 0;
 
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc) {
-	static uint32_t last_tick = 0;
-	uint32_t tick = HAL_GetTick();
-	if (tick <= last_tick + DEBOUNCE_ADC_DELAY) return;
-	last_tick = tick;
+	__HAL_ADC_DISABLE_IT(hadc, (ADC_IT_AWD));
 	hit_timestamps << HAL_GetTick();
+	n_adc_zeros_in_a_row = 0;
+	__HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_EOC);
+	__HAL_ADC_ENABLE_IT(hadc, (ADC_IT_EOC));
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+	if (HAL_ADC_GetValue(hadc) != 0) {
+		n_adc_zeros_in_a_row = 0;
+		return;
+	}
+
+	if (++n_adc_zeros_in_a_row >= 70) {
+		n_adc_zeros_in_a_row = 0;
+		__HAL_ADC_DISABLE_IT(hadc, (ADC_IT_EOC));
+		__HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
+		__HAL_ADC_ENABLE_IT(hadc, (ADC_IT_AWD));
+	}
 }
 
 void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* hadc) {
@@ -117,33 +132,26 @@ void Paradiddle::step_rise(void) {
 }
 
 void Paradiddle::step_fall(void) {
-	uint32_t tick1, tick2, tick3;
+	uint32_t tick1, tick2;
 	tick1 = rise_timestamps.get_previous();
 	rise_timestamps >> tick2;
 
-	// FIXME: something's wrong here. There should always be a step_rise
-	// before a step_fall, so this condition should never happen, but it
-	// is happening
-	if (tick2 < tick1) {
-		tick3 = tick1;
-		tick1 = tick2;
-		tick2 = tick3;
-	}
+	assert(tick2 >= tick1);
 
 	auto strip = LED_Strip::get_instance();
 	strip->off<LED_Strip::Section::Left>();
 	strip->off<LED_Strip::Section::Right>();
 
-    while (hit_timestamps.read_head() != last_hit_index) {
-    	uint32_t hit;
-    	hit_timestamps >> hit;
-    	// Not considering timestamp wrap. Should be rare and low-impact enough not to matter.
-    	if (hit <= tick1 + CORRECT_HIT_DELAY) {
-    		strip->more_green();
-    	} else if (hit >= tick2 - CORRECT_HIT_DELAY) {
-    		strip->more_green();
-    	} else {
-    		strip->more_red();
-    	}
-    }
+	while (hit_timestamps.read_head() != last_hit_index) {
+		uint32_t hit;
+		hit_timestamps >> hit;
+		// Not considering timestamp wrap. Should be rare and low-impact enough not to matter.
+		if (hit <= tick1 + CORRECT_HIT_DELAY) {
+			strip->more_green();
+		} else if (hit >= tick2 - CORRECT_HIT_DELAY) {
+			strip->more_green();
+		} else {
+			strip->more_red();
+		}
+	}
 }
