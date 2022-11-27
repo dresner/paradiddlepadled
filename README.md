@@ -8,6 +8,8 @@ Final project submission for Making Embedded Systems - Yellow Seahorses ![Yellow
 
 *Figure 1 - The Paradiddlepadled*
 
+Video demonstration: https://www.youtube.com/watch?v=h5-Xh5DLYk0
+
 # Bill of Materials
 
 This is the full list of materials used in this version of the system. Many of the components can be exchanged in different implementations.
